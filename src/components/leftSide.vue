@@ -25,6 +25,11 @@ export default {
           id: 1,
           img: '1',
           name: 'Test'
+        },
+        {
+          id: 2,
+          img: '2',
+          name: 'Test'
         }
       ]
     }

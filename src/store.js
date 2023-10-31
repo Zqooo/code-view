@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import FeaturesPropsMapping from './features/indexMapping'
-const panelConfig = {
+export const panelConfig = {
   width: 1920,
-  height: 1080
+  height: 1080,
+  gap:20
 }
 
 function builderPropsMapping(mappingProps) {
@@ -17,7 +18,6 @@ function builderPropsMapping(mappingProps) {
     }
   }
   walk(mappingProps)
-  console.log(props)
   return props
 }
 
@@ -67,7 +67,7 @@ function createStore() {
     },
     resize(el) {
       const { width: createContainerWidth } = el.getBoundingClientRect()
-      state.scale = createContainerWidth / panelConfig.width
+      state.scale = (createContainerWidth - panelConfig.gap * 2) / panelConfig.width
     },
     handleDragMove(component, event) {
       component.x = event.x
