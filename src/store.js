@@ -70,8 +70,9 @@ function createStore() {
       state.scale = (createContainerWidth - panelConfig.gap * 2) / panelConfig.width
     },
     handleDragMove(component, event) {
-      component.x = event.x
-      component.y = event.y
+      Object.keys(event).forEach(key => {
+        component[key] = event[key]
+      })
     }
   }
   const actions = {
