@@ -40,6 +40,36 @@
         bottom: -6px;
         cursor: se-resize;
       }
+      &.shape-point-t {
+        width: 24px;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: n-resize;
+      }
+      &.shape-point-b {
+        width: 24px;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: s-resize;
+      }
+
+      &.shape-point-l {
+        height: 24px;
+        left: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: w-resize;
+      }
+
+      &.shape-point-r {
+        height: 24px;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: e-resize;
+      }
     }
   }
 }
@@ -66,7 +96,7 @@ export default {
           context.isPointActive === false
         ) {
           Store.mutation.setActiveComponent(this.config.config.id);
-          console.log(Store.state, "state", this.config.config.id);
+          // console.log(Store.state, "state", this.config.config.id);
           return {
             clientX: e.clientX,
             clientY: e.clientY,
@@ -74,7 +104,7 @@ export default {
             top: this.config.y.value,
           };
         } else if (
-          document.querySelector(".create").contains(e.target)&&
+          document.querySelector(".create").contains(e.target) &&
           e.target.closest(".controller") === null
         ) {
           Store.mutation.setActiveComponent(null);
@@ -105,6 +135,10 @@ export default {
           return {
             clientX: e.clientX,
             clientY: e.clientY,
+            left: this.config.x.value,
+            top: this.config.y.value,
+            initWidth: this.config.props.width,
+            initHeight: this.config.props.height,
             point: e.target.classList.item(1).replace(/shape-point-/, ""),
           };
         } else {
@@ -112,20 +146,34 @@ export default {
         }
       },
       dragMove: (_, mouseMoveEvent, dragStartSource) => {
-        const { point, clientX, clientY } = dragStartSource;
+        const { point, clientX, clientY, left, top, initWidth, initHeight } =
+          dragStartSource;
         const isTop = /t/.test(point);
         const isBottom = /b/.test(point);
         const isLeft = /l/.test(point);
         const isRight = /r/.test(point);
+        let level = mouseMoveEvent.clientX - clientX;
+        let vertical = mouseMoveEvent.clientY - clientY;
+        if (isLeft) {
+          Store.mutation.handleDragMove(this.config, {
+            x: CSS.px(left + level / Store.state.scale),
+          });
+          level = ~level;
+        }
+        if (isTop) {
+          Store.mutation.handleDragMove(this.config, {
+            y: CSS.px(top + vertical / Store.state.scale),
+          });
+          vertical = ~vertical;
+        }
+        if (isLeft || isRight)
+          this.config.props.width = initWidth + level / Store.state.scale;
+        if (isTop || isBottom)
+          this.config.props.height = initHeight + vertical / Store.state.scale;
       },
       dargEnd() {
         context.isPointActive = false;
       },
-      // dragMove:(_,mouseMoveEvent,dragStartSource)=>{
-      //   console.log("--222-- dragMove");
-      //   mouseMoveEvent.stopPropagation();
-      //   mouseMoveEvent.preventDefault()
-      // }
     });
   },
   methods: {
@@ -146,6 +194,18 @@ export default {
           }),
           h("div", {
             class: "shape-point shape-point-br",
+          }),
+          h("div", {
+            class: "shape-point shape-point-t",
+          }),
+          h("div", {
+            class: "shape-point shape-point-b",
+          }),
+          h("div", {
+            class: "shape-point shape-point-l",
+          }),
+          h("div", {
+            class: "shape-point shape-point-r",
           }),
         ];
       }
