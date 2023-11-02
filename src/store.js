@@ -32,7 +32,8 @@ function createStore() {
       if (state.activeComponentId === null) {
         return null
       }
-      return state.config.find((item) => item.id === state.activeComponentId)
+      console.log(state.config);
+      return state.config.find((item) => item.config.id === state.activeComponentId)
     },
     panelStyle() {
       return {
