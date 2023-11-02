@@ -57,8 +57,7 @@
 import FeaturesComponents from "../features";
 import Store, { mapComputed, panelConfig } from "../store";
 import Controller from "../helperComponents/controller";
-import { SketchRule } from "vue3-sketch-ruler";
-import "vue3-sketch-ruler/lib/style.css";
+import SketchRule from "vue-sketch-ruler";
 export default {
   components: {
     ...FeaturesComponents,

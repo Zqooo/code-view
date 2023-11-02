@@ -96,7 +96,6 @@ export default {
           context.isPointActive === false
         ) {
           Store.mutation.setActiveComponent(this.config.config.id);
-          // console.log(Store.state, "state", this.config.config.id);
           return {
             clientX: e.clientX,
             clientY: e.clientY,
@@ -130,7 +129,11 @@ export default {
 
     dargHelper(document, {
       dragStart: (e) => {
-        if (e.target.classList.contains("shape-point")) {
+        const selfEL = this.$el;
+        if (
+          e.target.classList.contains("shape-point") &&
+          selfEL.contains(e.target)
+        ) {
           context.isPointActive = true;
           return {
             clientX: e.clientX,
@@ -171,7 +174,7 @@ export default {
         if (isTop || isBottom)
           this.config.props.height = initHeight + vertical / Store.state.scale;
       },
-      dargEnd() {
+      dragEnd() {
         context.isPointActive = false;
       },
     });
@@ -211,7 +214,6 @@ export default {
       }
       return [];
     },
-    handleMousePoint() {},
   },
   render(h) {
     const [first] = this.$slots.default;

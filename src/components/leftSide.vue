@@ -1,6 +1,6 @@
 <template>
   <darg @dragEnd="dragEnd">
-    <div v-for="item in config" :key="item.id" :dart-id="item.id">
+    <div v-for="(item, index) in config" :key="item.id" :dart-type="index">
       {{ item.img }}
     </div>
   </darg>
@@ -22,12 +22,10 @@ export default {
     return {
       config: [
         {
-          id: 1,
           img: '1',
           name: 'Test'
         },
         {
-          id: 2,
           img: '2',
           name: 'Test'
         }
@@ -36,15 +34,15 @@ export default {
   },
   methods: {
     dragEnd(e) {
-      const { el, done, id } = e
+      const { el, done, type } = e
       const toEl = document.querySelector(`#${this.to}`)
       if (toEl) {
         const { x, y, width, height } = toEl.getBoundingClientRect()
         const { x: dragX, y: dragY } = el.getBoundingClientRect()
         if (dragX > x && dragX < x + width && dragY > y && dragY < y + height) {
-          const configItem = this.config.find((item) => item.id.toString() === id.toString())
+          const configItem = this.config[type]
           Store.mutation.putConfig({
-            config: configItem,
+            config: {...configItem, id: Date.now()},
             x: dragX - x,
             y: dragY - y
           })

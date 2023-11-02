@@ -8,15 +8,15 @@ export default {
   mounted() {
     dargHelper(document, {
       dragStart: (e) => {
-        const id = e.target.getAttribute('dart-id')
-        if (id) {
+        const type = e.target.getAttribute('dart-type')
+        if (type) {
           const cloneTag = e.target.cloneNode(true)
           cloneTag.style.position = 'absolute'
           cloneTag.style.left = CSS.px(e.clientX)
           cloneTag.style.top = CSS.px(e.clientY)
           document.body.appendChild(cloneTag)
           return {
-            id,
+            type,
             cloneTag,
             clientX: e.clientX,
             clientY: e.clientY
@@ -29,9 +29,9 @@ export default {
         cloneTag.style.top = CSS.px(mouseMoveEvent.clientY - clientY)
       },
       dragEnd: (mouseupEvent, dragStartSource) => {
-        const { id, cloneTag } = dragStartSource
+        const { cloneTag, type } = dragStartSource
         this.$emit('dragEnd', {
-          id,
+          type,
           el: cloneTag,
           event: mouseupEvent,
           done() {
