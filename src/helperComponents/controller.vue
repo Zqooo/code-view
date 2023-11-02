@@ -214,7 +214,6 @@ export default {
       }
       return [];
     },
-    handleMousePoint() {},
   },
   render(h) {
     const [first] = this.$slots.default;
