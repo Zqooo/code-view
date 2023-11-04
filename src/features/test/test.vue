@@ -16,7 +16,11 @@ export default {
     height: {
       type: Number,
       default: 100
-    }
+    },
+    rotate: {
+      type: Number,
+      default: 0
+    },
   }
 }
 </script>

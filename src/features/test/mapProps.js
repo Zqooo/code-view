@@ -37,7 +37,16 @@ export default {
         max: 1000,
         step: 1,
         propKey: 'height'
-      })
+      }),
+      createMapPropsRender('旋转', {
+        type: 'number',
+        placeholder: '角度',
+        value: Test.props.rotate.default,
+        min: 0,
+        max: 1000,
+        step: 1,
+        propKey: 'rotate'
+      }),
     ])
   ]
 }
