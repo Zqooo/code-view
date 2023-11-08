@@ -70,6 +70,15 @@
         transform: translateY(-50%);
         cursor: e-resize;
       }
+      &.shape-point-x {
+        width: 12px;
+        height: 12px;
+        background-color: red;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: pointer;
+      }
     }
   }
 }
@@ -135,44 +144,102 @@ export default {
           selfEL.contains(e.target)
         ) {
           context.isPointActive = true;
-          return {
+          let basicOption = {
             clientX: e.clientX,
             clientY: e.clientY,
             left: this.config.x.value,
             top: this.config.y.value,
             initWidth: this.config.props.width,
             initHeight: this.config.props.height,
-            point: e.target.classList.item(1).replace(/shape-point-/, ""),
+          };
+          let addOption = {};
+          const point = e.target.classList.item(1).replace(/shape-point-/, "");
+          const isRotate = /x/.test(point);
+
+          if (isRotate) {
+            const rect = this.$el.getBoundingClientRect();
+            const origin = {
+              x: rect.x + (this.config.props.width * Store.state.scale) / 2,
+              y: rect.y + (this.config.props.height * Store.state.scale) / 2,
+            };
+            addOption = {
+              origin,
+              action: "rotate",
+            };
+          } else {
+            const position = {
+              isTop: /t/.test(point),
+              isBottom: /b/.test(point),
+              isLeft: /l/.test(point),
+              isRight: /r/.test(point),
+            };
+            addOption = {
+              position,
+              action: "scale",
+            };
+          }
+          return {
+            ...basicOption,
+            ...addOption,
           };
         } else {
           context.isPointActive = false;
         }
       },
       dragMove: (_, mouseMoveEvent, dragStartSource) => {
-        const { point, clientX, clientY, left, top, initWidth, initHeight } =
-          dragStartSource;
-        const isTop = /t/.test(point);
-        const isBottom = /b/.test(point);
-        const isLeft = /l/.test(point);
-        const isRight = /r/.test(point);
-        let level = mouseMoveEvent.clientX - clientX;
-        let vertical = mouseMoveEvent.clientY - clientY;
-        if (isLeft) {
-          Store.mutation.handleDragMove(this.config, {
-            x: CSS.px(left + level / Store.state.scale),
-          });
-          level = ~level;
+        if (
+          context.isPointActive === true &&
+          Store.mutation.isActiveComponent(this.config.config.id)
+        ) {
+          const { action } = dragStartSource;
+
+          const reducer = {
+            rotate: () => {
+              const { origin } = dragStartSource;
+              let level = mouseMoveEvent.clientX - origin.x;
+              let vertical = mouseMoveEvent.clientY - origin.y;
+              let rotationInRadians = Math.atan2(level, vertical);
+              let deg = rotationInRadians * (180 / Math.PI);
+              this.config.props.rotate = deg;
+            },
+            scale: () => {
+              const {
+                clientX,
+                clientY,
+                left,
+                top,
+                initWidth,
+                initHeight,
+                position,
+              } = dragStartSource;
+              const { isTop, isBottom, isLeft, isRight } = position;
+              let level = mouseMoveEvent.clientX - clientX;
+              let vertical = mouseMoveEvent.clientY - clientY;
+              if (isLeft) {
+                Store.mutation.handleDragMove(this.config, {
+                  x: CSS.px(left + level / Store.state.scale),
+                });
+                level = ~level;
+              }
+              if (isTop) {
+                Store.mutation.handleDragMove(this.config, {
+                  y: CSS.px(top + vertical / Store.state.scale),
+                });
+                vertical = ~vertical;
+              }
+              if (isLeft || isRight) {
+                let value = initWidth + level / Store.state.scale;
+                this.config.props.width = value <= 0 ? 0 : value;
+              }
+              if (isTop || isBottom) {
+                let value = initHeight + vertical / Store.state.scale;
+                this.config.props.height = value <= 0 ? 0 : value;
+              }
+            },
+          };
+
+          if (action) reducer[action]();
         }
-        if (isTop) {
-          Store.mutation.handleDragMove(this.config, {
-            y: CSS.px(top + vertical / Store.state.scale),
-          });
-          vertical = ~vertical;
-        }
-        if (isLeft || isRight)
-          this.config.props.width = initWidth + level / Store.state.scale;
-        if (isTop || isBottom)
-          this.config.props.height = initHeight + vertical / Store.state.scale;
       },
       dragEnd() {
         context.isPointActive = false;
@@ -210,6 +277,9 @@ export default {
           h("div", {
             class: "shape-point shape-point-r",
           }),
+          h("div", {
+            class: "shape-point shape-point-x",
+          }),
         ];
       }
       return [];
@@ -227,6 +297,7 @@ export default {
         style: {
           left: this.config.x,
           top: this.config.y,
+          transform: `rotate(${-this.config.props.rotate}deg)`,
         },
       },
       [...this.handleLight(h), first]
